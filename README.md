@@ -1,5 +1,5 @@
 <h1 align="center">Instagram Close Friends BOT</h1>
-<p align="center"><em>Mass-add all your Instagram followers into your Close Friends list — because everyone deserves VIP access.</em></p>
+<p align="center"><em>Mass-add all your Instagram followers into your Close Friends list — grant visibility to your stories and boost engagement.</em></p>
 <p align="center">
   <img src="https://img.shields.io/badge/License-GPLv3-blue"> <img src="https://img.shields.io/badge/Made%20with-Python-green"> <img src="https://img.shields.io/github/issues/tuliosousapro/Instagram-Close-Friends-BOT"> <img src="https://img.shields.io/github/stars/tuliosousapro/Instagram-Close-Friends-BOT?style=social">
 </p>
