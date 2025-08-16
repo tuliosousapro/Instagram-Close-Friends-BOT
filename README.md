@@ -1,11 +1,3 @@
-Awesome, Túlio! Based on your existing repo [Instagram-Close-Friends-BOT](https://github.com/tuliosousapro/Instagram-Close-Friends-BOT), here’s a polished and engaging `README.md` draft inspired by your Kindle2Notion style:
-
----
-
-<p align="center">
-  <img src="https://github.com/tuliosousapro/Instagram-Close-Friends-BOT/blob/main/docs/banner.jpg?raw=true" alt="Instagram Close Friends BOT Banner" width="100%" />
-</p>
-
 <h1 align="center">Instagram Close Friends BOT</h1>
 <p align="center"><em>Mass-add all your Instagram followers into your Close Friends list — because everyone deserves VIP access.</em></p>
 <p align="center">
