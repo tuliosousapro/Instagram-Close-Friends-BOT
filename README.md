@@ -71,4 +71,8 @@ This project is licensed under the **GNU GPLv3**. See the [LICENSE](LICENSE) fil
 Found a bug or have a feature request? Open an issue in this repo.
 
 ## ⭐️ Support
-If this bot made your Instagram life easier, give it a ⭐ and share it with your fellow social media HACKERS💀.
+If this bot made your Instagram life easier, give it a ⭐ and share it with your fellow social media **HACKERS💀**.
+
+---
+
+> #### ⚠️ Disclaimer: Please note that this is a research project. I am by no means responsible for any usage of this tool. Use it on your behalf. I'm also not responsible if your accounts get banned due to the extensive use of this tool.
