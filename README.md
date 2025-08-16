@@ -1,7 +1,7 @@
 <h1 align="center">Instagram Close Friends BOT</h1>
 <p align="center"><em>Mass-add all your Instagram followers into your Close Friends list — grant visibility to your stories and boost engagement.</em></p>
 <p align="center">
-  <img src="[https://img.shields.io/badge/status-BETA-orange](https://img.shields.io/badge/Under_Development-BETA-orange)">
+  <img src="https://img.shields.io/badge/Under_Development-BETA-orange">
   <img src="https://img.shields.io/badge/License-GPLv3-blue">
   <img src="https://img.shields.io/badge/Made%20with-Python-green">
   <img src="https://img.shields.io/github/issues/tuliosousapro/Instagram-Close-Friends-BOT">
@@ -25,6 +25,17 @@
    ```bash
    pip install -r requirements.txt
    ```
+## ⚠️ Beta Disclaimer
+> 🚧 This project is currently in BETA. That means:
+> 
+> Features may change or break unexpectedly.
+> 
+> Bugs might appear like uninvited guests at a party.
+> 
+> Documentation and setup instructions are still evolving.
+> 
+> We recommend using this bot in a test environment first. If you encounter issues, please open an issue and help us improve it!   
+
 
 ## 🛠️ Setup
 1. Configure your Instagram credentials and preferences in `config.py`.
