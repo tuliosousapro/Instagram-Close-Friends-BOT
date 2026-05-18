@@ -114,8 +114,11 @@ def add_close_friends_in_batches(client: Client, follower_ids: List[int], logger
         end = min(index + len(batch), total)
 
         logger.info("Adding close-friends batch %d-%d of %d...", start, end, total)
-        client.private_request("friendships/set_besties/", {"add": ",".join(map(str, batch))})
-        logger.info("Batch %d-%d completed.", start, end)
+        response = client.private_request("friendships/set_besties/", {"add": ",".join(map(str, batch))})
+        if response.get("status") == "ok":
+            logger.info("Batch %d-%d completed.", start, end)
+        else:
+            logger.error("Batch %d-%d failed: %s", start, end, response)
         time.sleep(REQUEST_DELAY_SECONDS)
 
     logger.info("Mass-add loop completed successfully.")
