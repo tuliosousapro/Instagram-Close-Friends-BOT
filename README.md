@@ -12,7 +12,7 @@
 ## ✨ Features
 - 🚀 Automatically adds all your followers to your Close Friends list.
 - 🔒 Uses session settings for secure login.
-- 🧠 Simple configuration via `config.py`.
+- 🧠 Simple configuration via `.env` (loaded by `SRC/config.py`).
 - 📦 Lightweight and fast — built with pure Python.
 
 ## ⚙️ Installation
@@ -38,7 +38,7 @@
 
 
 ## 🛠️ Setup
-1. Configure your Instagram credentials and preferences in `config.py`.
+1. Create a `.env` file in the repository root with your credentials and settings (see `.env.example`).
 2. Ensure your session settings are saved in `session_settings.json`.
 3. Run the bot:
    ```bash
@@ -52,7 +52,7 @@
 ## 🧪 Development
 - **Key files**:
   - `close_friends.py`: Main bot logic.
-  - `config.py`: User configuration.
+  - `config.py`: Loads and validates user configuration from `.env`.
   - `session_settings.json`: Session data.
 - **Language**: Python 3.x
 - **Dependencies**: Listed in `requirements.txt`

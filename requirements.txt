@@ -5,3 +5,5 @@ chromedriver_autoinstaller>=0.2.2
 # Dependências para automação via API (instagrapi):
 instagrapi>=1.15.2
 Pillow>=8.1.1
+
+python-dotenv>=1.0.0
