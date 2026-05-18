@@ -1,93 +1,169 @@
+import json
+import logging
 import time
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from config import USERNAME, PASSWORD  # Import credentials from config.py
+from pathlib import Path
+from typing import List, Tuple
 
-# Configurações
-TARGET = "TARGETED ACCOUNT" #PUT THE ACCOUNT @ THAT YOU AIM TO STEAL FOLLOWERS TO ADD TO CLOSE FRIENDS, MOST OF THE TIME IT WILL BE YOUR OWN ACCOUNT
-CHALLENGE_WAIT_TIME = 300
+from instagrapi import Client
+from instagrapi.exceptions import LoginRequired, ChallengeRequired
 
-def setup_driver():
-    mobile_emulation = {"deviceName": "Pixel 2"}
-    options = webdriver.ChromeOptions()
-    options.add_experimental_option("mobileEmulation", mobile_emulation)
-    options.add_argument("--disable-notifications")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--enable-unsafe-swiftshader")
-    options.add_argument("--disable-software-rasterizer")  # Added this line
-    driver = webdriver.Chrome(options=options)
-    return driver
+from config import (
+    USERNAME,
+    PASSWORD,
+    TARGET,
+    SESSION_FILE,
+    LOG_DIR,
+    LOG_LEVEL,
+    BATCH_SIZE,
+    REQUEST_DELAY_SECONDS,
+)
 
-def login_instagram(driver, username, password):
-    driver.get("https://www.instagram.com/accounts/login/")
-    print("URL inicial:", driver.current_url)
-    try:
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "username")))
-        print("Campos de login encontrados.")
-    except TimeoutException:
-        print("Tempo esgotado para carregar a página de login.")
-        return False
-    
-    # Preenche os campos
-    try:
-        user_input = driver.find_element(By.NAME, "username")
-        pass_input = driver.find_element(By.NAME, "password")
-        user_input.send_keys(username)
-        pass_input.send_keys(password)
-        pass_input.send_keys(Keys.ENTER)
-        time.sleep(5)
-    except NoSuchElementException:
-        print("Erro: Campos de username ou password não encontrados.")
-        return False
-    
-    # Verifica o resultado do login
-    print("URL após tentativa de login:", driver.current_url)
-    print("Título da página:", driver.title)
-    
-    # Trata 2FA ou CAPTCHA
-    try:
-        challenge_input = WebDriverWait(driver, CHALLENGE_WAIT_TIME).until(
-            EC.presence_of_element_located((By.NAME, "security_code"))
+
+def setup_logging() -> logging.Logger:
+    log_path = Path(LOG_DIR)
+    log_path.mkdir(parents=True, exist_ok=True)
+
+    logger = logging.getLogger("close_friends_bot")
+    logger.setLevel(getattr(logging, LOG_LEVEL.upper(), logging.INFO))
+
+    if not logger.handlers:
+        formatter = logging.Formatter(
+            "%(asctime)s | %(levelname)s | %(message)s", "%Y-%m-%d %H:%M:%S"
         )
-        challenge_code = input("Insira o código de verificação enviado pelo Instagram: ")
-        challenge_input.send_keys(challenge_code)
-        challenge_input.send_keys(Keys.ENTER)
-        time.sleep(5)
-    except TimeoutException:
-        pass
-    
-    # Trata pop-up "Salvar informações de login"
-    try:
-        not_now = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Agora não')]"))
-        )
-        not_now.click()
-        time.sleep(2)
-    except TimeoutException:
-        pass
-    
-    # Verifica se o login foi bem-sucedido
-    if "accounts/login" in driver.current_url:
-        print("Erro: Ainda na página de login. Verifique credenciais, CAPTCHA ou 2FA.")
-        print("Conteúdo da página:", driver.page_source[:1000])
-        return False
-    print("Login realizado com sucesso!")
-    return True
 
-def main():
-    driver = setup_driver()
-    if not login_instagram(driver, USERNAME, PASSWORD):
-        print("Falha no login, encerrando.")
-        driver.quit()
+        file_handler = logging.FileHandler(log_path / "close_friends.log", encoding="utf-8")
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
+
+    return logger
+
+
+def load_client_session(client: Client, session_file: str, logger: logging.Logger) -> bool:
+    session_path = Path(session_file)
+    if not session_path.exists():
+        logger.info("Session file not found (%s). A fresh login will be used.", session_file)
+        return False
+
+    try:
+        with session_path.open("r", encoding="utf-8") as fh:
+            session_data = json.load(fh)
+        client.set_settings(session_data)
+        logger.info("Session settings loaded from %s.", session_file)
+        return True
+    except (json.JSONDecodeError, OSError) as exc:
+        logger.warning("Unable to load session settings file: %s", exc)
+        return False
+
+
+def save_client_session(client: Client, session_file: str, logger: logging.Logger) -> None:
+    session_path = Path(session_file)
+    session_path.parent.mkdir(parents=True, exist_ok=True)
+    with session_path.open("w", encoding="utf-8") as fh:
+        json.dump(client.get_settings(), fh, indent=4)
+    logger.info("Session settings persisted to %s.", session_file)
+
+
+def authenticate(client: Client, logger: logging.Logger) -> None:
+    had_saved_session = load_client_session(client, SESSION_FILE, logger)
+
+    try:
+        if had_saved_session:
+            client.login(USERNAME, PASSWORD)
+            logger.info("Authenticated using restored session.")
+        else:
+            raise LoginRequired("No reusable session found")
+    except (LoginRequired, ChallengeRequired) as exc:
+        logger.warning("Session login failed (%s). Trying fresh credential login.", exc)
+        client.set_settings({})
+        client.login(USERNAME, PASSWORD)
+        logger.info("Authenticated using username/password.")
+
+    save_client_session(client, SESSION_FILE, logger)
+
+
+def extract_follower_ids(client: Client, target_username: str, logger: logging.Logger) -> List[int]:
+    logger.info("Resolving target user '%s'...", target_username)
+    try:
+        target_user_id = client.user_id_from_username(target_username)
+    except Exception as exc:
+        logger.error("Failed to resolve user ID for '%s': %s", target_username, exc)
+        raise
+    logger.info("Fetching followers for target id %s...", target_user_id)
+
+    followers = client.user_followers(target_user_id, amount=0)
+    follower_ids = list(followers.keys())
+    logger.info("Extracted %d followers from @%s.", len(follower_ids), target_username)
+    return follower_ids
+
+
+def add_close_friends_in_batches(client: Client, follower_ids: List[int], logger: logging.Logger) -> None:
+    if not follower_ids:
+        logger.warning("No followers found. Skipping close-friends update.")
         return
-    print("Login concluído, prosseguindo...")
-    driver.quit()
+
+    if BATCH_SIZE <= 0:
+        raise ValueError("BATCH_SIZE must be greater than zero.")
+
+    total = len(follower_ids)
+    failed_batches: List[Tuple[int, int, object]] = []
+    logger.info("Starting mass-add loop for %d users in batches of %d.", total, BATCH_SIZE)
+
+    for index in range(0, total, BATCH_SIZE):
+        batch = follower_ids[index : index + BATCH_SIZE]
+        start = index + 1
+        end = min(index + len(batch), total)
+
+        logger.info("Adding close-friends batch %d-%d of %d...", start, end, total)
+        response = client.private_request(
+            "friendships/set_besties/", {"add": ",".join(map(str, batch))}
+        )
+        if response.get("status") == "ok":
+            logger.info("Batch %d-%d completed.", start, end)
+        else:
+            failed_batches.append((start, end, response))
+            logger.error("Batch %d-%d failed: %s", start, end, response)
+        time.sleep(REQUEST_DELAY_SECONDS)
+
+    if failed_batches:
+        failed_ranges = ", ".join(f"{start}-{end}" for start, end, _ in failed_batches)
+        logger.error(
+            "Mass-add loop finished with %d failed batch(es): %s",
+            len(failed_batches),
+            failed_ranges,
+        )
+        raise RuntimeError(
+            f"Failed to add close friends for batch range(s): {failed_ranges}"
+        )
+
+    logger.info("Mass-add loop completed successfully.")
+
+
+def main() -> None:
+    logger = setup_logging()
+    logger.info("Instagram Close Friends BOT started.")
+
+    if not USERNAME or not PASSWORD:
+        logger.error("Please set IG_USERNAME and IG_PASSWORD in the .env file before running.")
+        return
+
+    if not TARGET:
+        logger.error("Please set IG_TARGET in the .env file before running.")
+        return
+
+    client = Client()
+    authenticate(client, logger)
+
+    target = TARGET.lstrip("@")
+    follower_ids = extract_follower_ids(client, target, logger)
+    add_close_friends_in_batches(client, follower_ids, logger)
+
+    save_client_session(client, SESSION_FILE, logger)
+    logger.info("Run finished.")
+
 
 if __name__ == "__main__":
     main()

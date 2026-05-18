@@ -1,0 +1,33 @@
+# Instagram Close Friends BOT
+
+> Mass-add all your Instagram followers into your Close Friends list — grant visibility to your stories and boost engagement.
+
+This project uses Selenium with mobile emulation to automate the addition of followers to the Close Friends list. It is currently in BETA and intended for research purposes.
+
+## Documentation
+
+- [README](README.md): Main project documentation, installation, and setup guide.
+- [GEMINI.md](GEMINI.md): Technical context, architecture overview, and AI agent instructions.
+- [Changelog](CHANGELOG.md): Tracking of all notable changes and semantic versioning.
+- [Contributing Guide](CONTRIBUTING.MD): Standards for contributing to this repository.
+- [Code of Conduct](CODE_OF_CONDUCT.md): Community expectations and guidelines.
+- [Security Policy](SECURITY.md): Instructions for reporting security vulnerabilities.
+
+## Source Code
+
+- [Main Automation](SRC/close_friends.py): Core logic for Instagram interaction and automation.
+
+## Configuration
+
+- [Config Template](SRC/config.py): User-defined credentials and target account settings.
+- [Dependencies](requirements.txt): Required Python libraries (Selenium, instagrapi, etc.).
+
+## Metadata
+
+- [Humans](humans.txt): Author credits and development environment details.
+- [Repository Metadata](.github/repository-metadata.json): JSON metadata for repository identification.
+
+## Tasks
+
+- [Todo List](tasks/todo.md): Active tasks, roadmap, and project status.
+- [Lessons](tasks/lessons.md): Technical learnings and process improvements.

@@ -12,7 +12,7 @@
 ## ✨ Features
 - 🚀 Automatically adds all your followers to your Close Friends list.
 - 🔒 Uses session settings for secure login.
-- 🧠 Simple configuration via `config.py`.
+- 🧠 Simple configuration via `.env` (loaded by `SRC/config.py`).
 - 📦 Lightweight and fast — built with pure Python.
 
 ## ⚙️ Installation
@@ -38,11 +38,11 @@
 
 
 ## 🛠️ Setup
-1. Configure your Instagram credentials and preferences in `config.py`.
-2. Ensure your session settings are saved in `session_settings.json`.
+1. Create a `.env` file in the repository root with your credentials and settings (see `.env.example`).
+2. Ensure your session settings are saved in `SRC/session_settings.json` or the path configured by `SESSION_FILE`.
 3. Run the bot:
    ```bash
-   python close_friends.py
+   python SRC/close_friends.py
    ```
 
 ## 🚀 Usage
@@ -51,9 +51,9 @@
 
 ## 🧪 Development
 - **Key files**:
-  - `close_friends.py`: Main bot logic.
-  - `config.py`: User configuration.
-  - `session_settings.json`: Session data.
+  - `SRC/close_friends.py`: Main bot logic.
+  - `SRC/config.py`: Loads and validates user configuration from `.env`.
+  - `SRC/session_settings.json`: Session data.
 - **Language**: Python 3.x
 - **Dependencies**: Listed in `requirements.txt`
 
@@ -75,4 +75,4 @@ If this bot made your Instagram life easier, give it a ⭐ and share it with you
 
 ---
 
-> #### ⚠️ Disclaimer: Please note that this is a research project. I am by no means responsible for any usage of this tool. Use it on your behalf. I'm also not responsible if your accounts get banned due to the extensive use of this tool.
+> #### ⚠️ Disclaimer: Please note that this is a research project. I am by no means responsible for any usage of this tool. Use it at your own risk. I'm also not responsible if your accounts get banned due to the extensive use of this tool.

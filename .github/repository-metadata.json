@@ -1,0 +1,6 @@
+{
+  "name": "Instagram-Close-Friends-BOT",
+  "description": "Mass-add all your Instagram followers into your Close Friends list.",
+  "tech_stack": ["Python", "Selenium"],
+  "owner": "tuliosousapro"
+}
