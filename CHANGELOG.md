@@ -16,4 +16,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created `humans.txt` following the team schema.
 - Initialized `.gitignore` with Python and environment protections.
 - Added `.env` template for local configuration.
+- Created `llms.txt` following the official specification.
 - Established `CHANGELOG.md` and semantic versioning.
