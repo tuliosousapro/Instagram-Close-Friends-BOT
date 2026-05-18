@@ -2,7 +2,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from instagrapi import Client
 from instagrapi.exceptions import LoginRequired, ChallengeRequired
@@ -105,7 +105,11 @@ def add_close_friends_in_batches(client: Client, follower_ids: List[int], logger
         logger.warning("No followers found. Skipping close-friends update.")
         return
 
+    if BATCH_SIZE <= 0:
+        raise ValueError("BATCH_SIZE must be greater than zero.")
+
     total = len(follower_ids)
+    failed_batches: List[Tuple[int, int, object]] = []
     logger.info("Starting mass-add loop for %d users in batches of %d.", total, BATCH_SIZE)
 
     for index in range(0, total, BATCH_SIZE):
@@ -114,12 +118,26 @@ def add_close_friends_in_batches(client: Client, follower_ids: List[int], logger
         end = min(index + len(batch), total)
 
         logger.info("Adding close-friends batch %d-%d of %d...", start, end, total)
-        response = client.private_request("friendships/set_besties/", {"add": ",".join(map(str, batch))})
+        response = client.private_request(
+            "friendships/set_besties/", {"add": ",".join(map(str, batch))}
+        )
         if response.get("status") == "ok":
             logger.info("Batch %d-%d completed.", start, end)
         else:
+            failed_batches.append((start, end, response))
             logger.error("Batch %d-%d failed: %s", start, end, response)
         time.sleep(REQUEST_DELAY_SECONDS)
+
+    if failed_batches:
+        failed_ranges = ", ".join(f"{start}-{end}" for start, end, _ in failed_batches)
+        logger.error(
+            "Mass-add loop finished with %d failed batch(es): %s",
+            len(failed_batches),
+            failed_ranges,
+        )
+        raise RuntimeError(
+            f"Failed to add close friends for batch range(s): {failed_ranges}"
+        )
 
     logger.info("Mass-add loop completed successfully.")
 
