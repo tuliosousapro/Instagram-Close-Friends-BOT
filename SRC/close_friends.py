@@ -87,7 +87,11 @@ def authenticate(client: Client, logger: logging.Logger) -> None:
 
 def extract_follower_ids(client: Client, target_username: str, logger: logging.Logger) -> List[int]:
     logger.info("Resolving target user '%s'...", target_username)
-    target_user_id = client.user_id_from_username(target_username)
+    try:
+        target_user_id = client.user_id_from_username(target_username)
+    except Exception as exc:
+        logger.error("Failed to resolve user ID for '%s': %s", target_username, exc)
+        raise
     logger.info("Fetching followers for target id %s...", target_user_id)
 
     followers = client.user_followers(target_user_id, amount=0)
