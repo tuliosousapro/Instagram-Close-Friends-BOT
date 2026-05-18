@@ -76,8 +76,9 @@ def authenticate(client: Client, logger: logging.Logger) -> None:
             logger.info("Authenticated using restored session.")
         else:
             raise LoginRequired("No reusable session found")
-    except (LoginRequired, ChallengeRequired, Exception) as exc:
-        logger.warning("Session login failed (%s). Trying credential login.", exc)
+    except (LoginRequired, ChallengeRequired) as exc:
+        logger.warning("Session login failed (%s). Trying fresh credential login.", exc)
+        client.set_settings({})
         client.login(USERNAME, PASSWORD)
         logger.info("Authenticated using username/password.")
 
