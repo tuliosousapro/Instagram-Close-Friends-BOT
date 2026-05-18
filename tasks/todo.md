@@ -1,6 +1,6 @@
 # TODO
 
-- [x] Implement basic project configurations (GEMINI.md, tasks, metadata, humans.txt, .env, .gitignore) <!-- id: 4 -->
+- [x] Implement basic project configurations (GEMINI.md, tasks, metadata, humans.txt, .env, .gitignore, llms.txt) <!-- id: 4 -->
 - [ ] Implement follower extraction logic <!-- id: 0 -->
 - [ ] Refine session persistence in `session_settings.json` <!-- id: 1 -->
 - [ ] Add robust logging to `SRC/log/` <!-- id: 2 -->
